@@ -19,7 +19,7 @@ $(function() {
 /* # Data tables
 ================================================== */
 
-
+/* Commented all data tables. We use boostraptable instead. 
 	//===== Default datatable =====//
 
 	oTable = $('.datatable table').dataTable({
@@ -215,7 +215,7 @@ $(function() {
 
 
 
-
+*/
 
 
 

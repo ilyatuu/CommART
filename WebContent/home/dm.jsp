@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<!-- Insert Project Title Below -->
-	<title>SOAR::DM HOME</title>
+	<title>SOAR::HOME</title>
 	<!-- Google Fonts -->
 	<!--
 		//Disabled: Currently using local copy
@@ -32,8 +32,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 		dbase  = session.getAttribute("dbase").toString();
 		fname  = session.getAttribute("fname").toString();
 		lname  = (session.getAttribute("lname") == null) ? "":session.getAttribute("lname").toString();
-		fname  = fname + " " + lname;
-		
+		fname  = fname + " " + lname; 
 		if( !sid1.equals(sid2) ){
 			response.sendRedirect("index.html?msg='Forbidden 1'");
 		}
@@ -95,7 +94,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
     	<!-- Sidebar -->
         <div class="sidebar collapse">
         	<ul class="navigation">
-            	<li class="active"><a href="index.jsp"><i class="fa fa-laptop"></i> Dashboard</a></li>
+            	<li class="active"><a href="#"><i class="fa fa-laptop"></i> Dashboard</a></li>
             	<li>
         			<a href="#" class="expand"><i class="fa fa-table"></i> Tables</a>
 					<ul>
@@ -124,12 +123,12 @@ if(!session.isNew() && session.getAttribute("uname") != null){
         <div class="page-content">
             <!-- Page title -->
         	<div class="page-title">
-                <h5><i class="fa fa-bars"></i>DM Dashboard <small>Welcome, <% out.print(fname); %> </small></h5>
+                <h5><i class="fa fa-bars"></i> Dashboard <small>Welcome, <% out.print(fname); %> </small></h5>
             </div>
             <!-- /page title -->
             
             <!-- Statistics -->
-             <ul class="row stats">
+            <ul class="row stats">
                 <li class="col-xs-3"><a id="idusers" href="#" class="btn btn-default">13</a> <span>Active Users</span></li>
                 <li class="col-xs-3"><a id="idctcno" href="#" class="btn btn-default">52</a> <span>Records with CTC Number</span></li>
                 <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">14</a> <span>Records with VIRAL Load</span></li>
@@ -143,18 +142,32 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                     <h6 class="panel-title">Form Submissions</h6>
                 </div>
                 <div class="panel-body">
-                    <table id="tblOne"
-				        data-toggle="tblUserList"
-				        data-pagination="true"
-				        data-page-size="5"
-				        data-page-list="[5, 10, 20]"
-				        data-search="true" >         
-				   	</table>
+                    <!-- Serach control -->
+                <div class="row">
+                	<div class="rtl-inputs">
+                		<div class="col-md-4">
+                			<div class="input-group">
+	                           	<input id = "search" name="search" type="text" class="form-control" placeholder="Search Word">
+	                           	<span class="input-group-btn">
+	                           		<button id="searchBtn" class="btn btn-default" type="button">Search</button>
+	                           	</span>
+                            </div>
+                       	</div>
+                       	<div class="col-md-2">
+                                <select id="searchBy" name="searchBy" class="select">
+                                	<option value="FACILITY">Site</option>
+                                	<option value="VIRAL_ID">Viral ID</option>
+                                	<option value="CTC_NO">CTC Number</option>
+                                </select>
+                       	</div>
+                	</div>
+                </div>
+                <table id="tblOne"></table>
                 </div>
             </div>
             <!-- /form submission data -->
             
-             <!-- Edit Link: Form Modal -->
+            <!-- Edit CTC Info Link: Form Modal -->
             <div id="frmViroLoad" class="modal fade" tabindex="-1" role="dialog">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -233,12 +246,17 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 <script type="text/javascript" src="../js/plugins/interface/collapsible.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/bootstrap-table.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/validate.min.js"></script>
+<script type="text/javascript" src="../js/plugins/forms/select2.min.js"></script>
 <script>
 	$(document).ready(function(){
 		var today = new Date();
 		var RowIndex;
 		loadTable1();
-		loadSummary();
+		//loadSummary();
+		$("#searchBy").select2({
+			width:'100%',
+			minimumResultsForSearch: Infinity,
+			});
 		$("#logout").click(function(){
 			$.ajax({
 				url:"../User",
@@ -247,9 +265,16 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			});
 			window.location.replace("../");
 		});
+		$("#searchBtn").click(function(){
+			$("#tblOne").bootstrapTable('refresh');
+		});
 		$('#frmViroLoad').on('show.bs.modal', function () {
 			$("input[name='tdate']").val( today.toDateString() );
 			$("input[name='results']").val( "" );
+		});
+		//Refresh
+		$("#tblOne").on('refresh.bs.table', function(){
+			alert("hellow");
 		});
 		//Row Click
 	    $("#tblOne").on('click-row.bs.table', function(e, row, $element){
@@ -289,7 +314,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				   	success: function(data) {
 				   		updateTableCell(RowIndex,"CTC_NO",$("input[name='results']").val());
 	                    $("#frmViroLoad").modal('hide');
-	                    loadSummary();
+	                    //loadSummary();
 	                },
 	                error: function(xhr, ajaxOptions, thrownError){
 	                    validator.showErrors( {"viro": xhr.status + " " + thrownError });
@@ -316,48 +341,66 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			});
 		}
 		function loadTable1(){
-			$.ajax({
-				url : "../User",
-				type: "POST",
-				data: "rtype=5&tablename=view_table1",
-				datatype: "json",
-				async: false,
-				success: function(data){
-					$("#tblOne").bootstrapTable({
-						data: data.rows,
-						columns: [{
-					    	field: 'REGION',
-					    	title: 'Region'
-					    },{
-					    	field: 'DISTRICT',
-					    	title: 'District',
-					    	sortable: true,
-					    	align: 'left'
-					    },{
-					    	field: 'HEALTH_FACILITY',
-					    	title: 'Health Facility',
-					    	sortable: true,
-					    	align: 'left'
-					    },{
-					    	field: 'VIRAL_ID',
-					    	title: 'Viral ID',
-					    	sortable: true,
-					    	align: 'left'
-					    },{
-					    	field: 'EDIT',
-					    	title: 'Edit',
-					    	align: 'center'
-					    },{
-					    	field: 'CTC_NO',
-					    	title: 'CTC Number',
-					    	sortable: true,
-					    	align: 'center'
-					    }]
-					})
+			$("#tblOne").bootstrapTable({
+				url: "../View",
+				method: "post",
+				pagination: true,
+				sidePagination: "server",
+				contentType: 'application/x-www-form-urlencoded',
+				showColumns: true,
+				search: false,
+				pageSize: 10,
+            	pageList: [10, 25, 50, 100],
+            	showRefresh: true,
+				queryParams: function(p){
+				return{
+					rtype: 2,
+					tablename: "view_table1",
+					limit : this.pageSize,
+					offset: this.pageSize * (this.pageNumber - 1),
+					//search: this.searchText,
+					search : $("#search").val(),
+					searchBy: $("#searchBy").val(),
+					sort:	this.sortName,
+					order:  this.sortOrder
 				}
-				
-			});
+				},
+				columns: [{
+				   	field: 'REGION',
+			    	title: 'Region'
+			    },{
+				   	field: 'DISTRICT',
+				   	title: 'District',
+				   	sortable: true,
+				   	align: 'left'
+			    },{
+				   	field: 'FACILITY',
+				   	title: 'Health Facility',
+				   	sortable: true,
+				   	align: 'left'
+			   },{
+				  	field: 'VIRAL_ID',
+				   	title: 'Viral ID',
+				   	sortable: true,
+				  	align: 'left'
+			    },{
+			    	field: 'VIRAL_RESULTS',
+			    	title: 'Viral Results',
+			    	sortable: true,
+			    	align: 'center'
+			    },{
+			    	field: 'EDIT',
+			    	title: 'Edit',
+			    	align: 'center'
+			    },{
+				  	field: 'CTC_NO',
+				  	title: 'CTC Number',
+				  	align: 'center',
+				  	sortable: true
+			   }]
+			})
 		}
+				
 		function updateTableCell(index,cellid,cellval){
 			$("#tblOne").bootstrapTable('updateCell', {
 				index: index,

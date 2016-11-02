@@ -151,7 +151,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                                 <input name="lname" type="text" class="form-control" placeholder="Last Name">
                             </div>
                             <div class="col-md-3">
-                                <select name="urole" class="form-control">
+                                <select id="urole" name="urole" class="select">
                                 	<option value="0">Select Role</option>
                                 	<option value="1">Administrator</option>
                                 	<option value="2">Data Manager</option>
@@ -159,13 +159,18 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <input name="dbase" type="text" class="form-control" placeholder="Database">
+                                <select id="orgunit" name="orgunit" class="select">
+                                	<option value="0">Select Organization</option>
+                                </select>
                             </div>
             			</div>
             			<div class="form-actions text-right">
             				<input type="reset" value="Reset" class="btn btn-primary">
                             <input type="submit" value="Add User" class="btn btn-primary">
                             <input type="hidden" name="rtype" value="4">
+                            <input type="hidden" name="dbase" value="odk_viro">
+                            <input type="hidden" name="level" value="">
+                            <input type="hidden" name="levelvalue" value="">
                         </div>
             		</div>
             	</div>
@@ -218,10 +223,28 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 <script type="text/javascript" src="../js/plugins/interface/collapsible.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/bootstrap-table.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/validate.min.js"></script>
+<script type="text/javascript" src="../js/plugins/forms/select2.min.js"></script>
 <script>
 	$(document).ready(function(){
 		loadUsers();
-
+		loadControls();
+	
+		$("#orgunit").select2({ width: '100%' });		//Other have used resolve instead of 100%
+		$("#urole").select2({ width: '100%' });
+		
+		
+		//Get the user level value from optgroup
+		$("#orgunit").on('change', function() {
+			
+			var opt = $(this).find(':selected');
+		    var sel = opt.text();					
+		    var og = opt.closest('optgroup').attr('name');	//or you can use attribute label
+		    
+		    $('input[name="level"]').val( og ); //assign the value to hidden input control
+		    $('input[name="levelvalue"]').val( sel ); //assign the value to hidden input control
+		    
+		});
+		
 		$("#logout").click(function(){
 			$.ajax({
 				url:"../User",
@@ -232,6 +255,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 		});
 		
 		$("#frmAddUsr").validate({
+			ignore: "",
 			rules:{
 				username: {
 					required: true,
@@ -247,6 +271,9 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				},
 				urole:{
 					selectRole: true
+				},
+				orgunit:{
+					selectSite: true
 				}
 			},
 			messages:{
@@ -266,15 +293,23 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				var validator = this;
 				$.ajax({
 					type: $(form).attr('method'),
-				   	url: $(form).attr('action'),
+				  	url: $(form).attr('action'),
 				   	data: $(form).serialize(),
 				   	dataType : 'json'
 					}).done(function (response) {
 				   	if (!response.success) {
 				 		validator.showErrors( {"password": response.message});
+				 	}else{
+				 		$("#frmAddUsr")[0].reset();
 				 	}
+				   	
 				})
+				
+				//Refresh table
+				//$(form).reset();
+				$("#tblUserList").bootstrapTable('refresh');
 				return false; // required to block normal submit since you used ajax
+				
 			}
 		});
 		
@@ -282,6 +317,41 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 	        return (value != '0');
 	    }, "Role is required");
 		
+		jQuery.validator.addMethod('selectSite', function (value) {
+	        return (value != '0');
+	    }, "User site is required");
+		
+		function loadControls(){
+			$.ajax({
+				url: "../Controls",
+				type: "POST",
+				data: "rtype=1",
+				datatype: "json",
+				success: function(data){
+					//Region
+					html = "<optgroup name='region' label='Region'>";
+					$.each(data.regions, function(key, val){
+						html += "<option value=" + val.id + ">" + val.name + "</option>";
+				    })
+				    html +="</optgroup>"
+				    $("#orgunit").append(html);
+					//District
+					html = "<optgroup name='district' label='District'>";
+					$.each(data.districts, function(key, val){
+						html += "<option value=" + val.id + ">" + val.name + "</option>";
+				    })
+				    html +="</optgroup>"
+				    $("#orgunit").append(html);
+					//Site
+					html = "<optgroup name='site' label='Site'>";
+					$.each(data.sites, function(key, val){
+						html += "<option value=" + val.id + ">" + val.name + "</option>";
+				    })
+				    html +="</optgroup>"
+				    $("#orgunit").append(html);
+				}
+			});
+		}
 		function loadUsers(){
 			$.ajax({
 				url : "../User",
@@ -307,6 +377,9 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 					    },{
 					    	field: 'urole',
 					    	title: 'User Role'
+					    },{
+					    	field: 'levelvalue',
+					    	title: 'Home Directory'
 					    },{
 					    	field: 'dbase',
 					    	title: 'Data Base'

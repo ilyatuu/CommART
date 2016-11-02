@@ -9,10 +9,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
-
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,9 +42,14 @@ public class User extends HttpServlet {
 	private ResultSet rset = null;
 	private PreparedStatement pstm = null;
 	
-	String colname   = "";
-	String tablename = "";
-	String database  = "";   
+	String colname	= "";
+	String tablename= "";
+	String database = ""; 
+	
+	DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	Date date = new Date();
+	String formatedDate = df.format(date);
+	
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -81,6 +89,8 @@ public class User extends HttpServlet {
 		                session.setAttribute("fname", user.getFirstname());
 		                session.setAttribute("lname", user.getLastname());
 		                session.setAttribute("dbase", user.getDBase());
+		                session.setAttribute("level", user.getLevel());
+		                session.setAttribute("levelvalue", user.getLevelValue());
 		                session.setMaxInactiveInterval(30*60);
 		                
 		                response.setContentType("application/json;charset=utf-8");
@@ -111,11 +121,12 @@ public class User extends HttpServlet {
 		                pw.print(json.toString());
 		                pw.close();
 		                
-		                System.out.println(json.toString());
+		                //System.out.println(json.toString());
+		                System.out.println("Login session for user "+user.getUsername()+" at "+formatedDate);
 					}else{
 				    	json = new JSONObject();
 		                json.put("success", false);
-		                json.put("message", "invalid username or password");
+		                json.put("message", user.getError());
 		                pw.print(json.toString());
 				    	pw.close();
 				    	System.out.println("User login failed for user "+ user.getUsername());
@@ -147,14 +158,18 @@ public class User extends HttpServlet {
 				user.setLastname(request.getParameter("lname"));
 				user.setRole(Integer.parseInt( (request.getParameter("urole")) ));
 				user.setDBase(request.getParameter("dbase"));
+				user.setLevel((request.getParameter("level")));
+				user.setLevelValue((request.getParameter("levelvalue")));
+				user.setIsAutheticated(false);
 				
+				UserRec newUser = AddUser(user);
 				json =  new JSONObject();
-				if(AddUser(user)){
+				if(newUser.isAuthenticated()){
 					json.put("success", true);
-					json.put("message", "User added!");
+					json.put("message", newUser.getError());
 				}else{
 					json.put("success", false);
-					json.put("message", "Failed to add user");
+					json.put("message", newUser.getError());
 				}
 				pw = response.getWriter();
                 pw.print(json.toString());
@@ -174,6 +189,9 @@ public class User extends HttpServlet {
 				viro.setPatientId(request.getParameter("viralid") );
 				viro.setResults(request.getParameter("results") );
 				viro.setRecId(request.getParameter("recid"));
+				viro.setComments(request.getParameter("comments"));
+				viro.setType(request.getParameter("vtype"));
+				viro.setQuality(request.getParameter("squality"));
 				viro.setSubmitedBy( (Integer)request.getSession().getAttribute("uid") );
 				
 				json =  new JSONObject();
@@ -198,11 +216,15 @@ public class User extends HttpServlet {
 				
 				break;
 			case 7: //Select summary
+				
 				session = request.getSession();
-				tablename =  request.getParameter("tablename");
-				database  =  session.getAttribute("dbase").toString();
+				JSONObject usr = new JSONObject();
+				usr.put("database", session.getAttribute("dbase").toString());
+				usr.put("level", session.getAttribute("level").toString());
+				usr.put("levelvalue", session.getAttribute("levelvalue").toString());
+				
 				if(!session.isNew()){
-					pw.print( selectSummary( tablename, database ).toString() );
+					pw.print( selectSummary( usr ).toString() );
 					pw.close();
 				}
 				break;
@@ -231,7 +253,7 @@ public class User extends HttpServlet {
 			rset = pstm.executeQuery();
 			json = new JSONObject();
 			
-			System.out.println(pstm.toString());
+			//System.out.println(pstm.toString());
 			
 			if(rset.next()){
 				//user.setUid( Integer.parseInt( (rset.getObject("id").toString() )));
@@ -240,12 +262,26 @@ public class User extends HttpServlet {
 				user.setLastname(rset.getString("lname"));
 				user.setDBase(rset.getObject("dbase").toString() );
 				user.setRole( rset.getInt("urole") );
+				user.setLevel(rset.getString("level"));
+				user.setLevelValue(rset.getString("levelvalue"));
 				user.setIsAutheticated(true);
 			}else{
 				user.setIsAutheticated(false);
+				user.setError("Invalid user name or password");
 			}
+			
+			//Now update last login column
+			query = "UPDATE _users SET lastlogin=? WHERE id=?";
+			pstm = cnn.prepareStatement(query);
+			pstm.setString(1, formatedDate);
+			pstm.setInt(2, user.getUid());
+			pstm.executeUpdate();
+						
 		}catch(SQLException e){
+			user.setError( "Communication link failure. Check if MySQL is running" );
+			user.setIsAutheticated(false);
 			e.printStackTrace();
+			return user;
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
@@ -264,33 +300,45 @@ public class User extends HttpServlet {
 		}
 		return user;
 	}
-	protected boolean AddUser(UserRec usr){
+	protected UserRec AddUser(UserRec usr){
 		try{
 			db = new DbDetails();
 			cnn = db.getConn();
-			query = "INSERT INTO _users(uname,upass,fname,lname,urole,dbase) VALUES(?,?,?,?,?,?);";
+			query = "INSERT INTO _users(uname,upass,fname,lname,urole,level,levelvalue,dbase) VALUES(?,?,?,?,?,?,?,?);";
 			pstm = cnn.prepareStatement(query);
 			pstm.setString(1, usr.getUsername());
 			pstm.setString(2, usr.getPassword());
 			pstm.setString(3, usr.getFirstname());
 			pstm.setString(4, usr.getLastname());
 			pstm.setInt(5, usr.getRole());
-			pstm.setString(6, usr.getDBase());
+			pstm.setString(6, usr.getLevel());
+			pstm.setString(7, usr.getLevelValue());
+			pstm.setString(8, usr.getDBase());
 			
 			//Log insert
 			System.out.println(pstm.toString());
 			
 			if (pstm.executeUpdate() == 1){
-				return true;
+				usr.setIsAutheticated(true);
+				usr.setError("New user added");
+				return usr;
 			}else{
-				return false;
+				usr.setError("Failed to add new user");
+				return usr;
 			}
 		}catch(SQLException e){
-			e.printStackTrace();
-			return false;
+			//e.printStackTrace();
+			
+			if( e.getErrorCode()==1062 ){
+				usr.setError("Username already exist!");
+			}else{
+				usr.setError("SQL Error");
+			}
+			return usr;
 		}catch(Exception e){
 			e.printStackTrace();
-			return false;
+			usr.setError("Exception Error");
+			return usr;
 		}finally{
 			//finally block used to close resources
 		      try{
@@ -310,10 +358,14 @@ public class User extends HttpServlet {
 		try{
 			db = new DbDetails();
 			cnn = db.getConn(dbase);
-			query = "UPDATE "+dtable+" SET "+colname+"=? WHERE _URI=?;";
+			query = "UPDATE "+dtable+" SET VIRAL_RESULTS=?, VIRAL_COMMENTS=?,VIRAL_QUALITY=?, VIRAL_TYPE=?, SUBMITED_BY=? WHERE _URI=?;";
 			pstm = cnn.prepareStatement(query);
 			pstm.setString(1, viro.getResults());
-			pstm.setString(2, viro.getRecId());
+			pstm.setString(2, viro.getComments());
+			pstm.setString(3, viro.getQuality());
+			pstm.setString(4, viro.getType());
+			pstm.setInt(5, viro.getSubmitedBy());
+			pstm.setString(6, viro.getRecId());
 			
 			//Log Update
 			System.out.println(pstm.toString());
@@ -433,24 +485,59 @@ public class User extends HttpServlet {
 		}
 		
 	}
-	protected JSONObject selectSummary(String tablename, String database){
+	protected JSONObject selectSummary(JSONObject usr){
 		try{
 			db = new DbDetails();
-			cnn = db.getConn(database);
-			query = "SELECT * FROM "+tablename+";";
+			cnn = db.getConn(usr.getString("database"));
+			
+			query = "SELECT COUNT(*) FROM view_table1;";
+			
+			if(!usr.getString("level").equalsIgnoreCase("country")){
+				if(!usr.getString("level").isEmpty() && !usr.getString("levelvalue").isEmpty()){
+					query = query.replace(";", "")+" WHERE "+usr.getString("level")+" like '"+ usr.getString("levelvalue")+"';";
+				}
+
+			}
+						
 			pstm = cnn.prepareStatement(query);
 			rset = pstm.executeQuery();
-			java.sql.ResultSetMetaData columns = rset.getMetaData();
 			
-			json = new JSONObject();
+			JSONObject json = new JSONObject();
 			if(rset.next()){
-				for (int i=1;i<=columns.getColumnCount();i++){
-					json.put( columns.getColumnName(i), rset.getObject(i));
-					//System.out.println(columns.getColumnTypeName(i));
-				}
-				jarr.put(json);
+				json.put("total_rec",rset.getInt(1));
 			}
+			
+			if(usr.getString("level").equalsIgnoreCase("country")){
+				query = query.replace(";", "") + " WHERE CTC_NO IS NOT NULL";
+			}else{
+				query = query.replace(";", " AND ") + " CTC_NO IS NOT NULL";
+			}
+			
+			pstm = cnn.prepareStatement(query);
+			rset = pstm.executeQuery();
+			
+			if(rset.next()){
+				json.put("total_ctc",rset.getInt(1));
+			}
+			query = query.replace("CTC_NO", "VIRAL_ID");
+			pstm = cnn.prepareStatement(query);
+			rset = pstm.executeQuery();
+			
+			if(rset.next()){
+				json.put("total_viral",rset.getInt(1));
+			}
+			query = query.replace("VIRAL_ID", "VIRAL_ID IS NOT NULL AND VIRAL_RESULTS");
+			pstm = cnn.prepareStatement(query);
+			rset = pstm.executeQuery();
+			
+			if(rset.next()){
+				json.put("total_results",rset.getInt(1));
+			}
+			
 			return json;
+		}catch(JSONException e){
+			e.printStackTrace();
+			return null;
 		}catch(SQLException e){
 			e.printStackTrace();
 			return null;

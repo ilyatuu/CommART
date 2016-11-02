@@ -19,4 +19,24 @@
     <servlet-name>User</servlet-name>
     <url-pattern>/User</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description>Views for different screens</description>
+    <display-name>View</display-name>
+    <servlet-name>View</servlet-name>
+    <servlet-class>dashboard.View</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>View</servlet-name>
+    <url-pattern>/View</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>Controls</display-name>
+    <servlet-name>Controls</servlet-name>
+    <servlet-class>dashboard.Controls</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Controls</servlet-name>
+    <url-pattern>/Controls</url-pattern>
+  </servlet-mapping>
 </web-app>

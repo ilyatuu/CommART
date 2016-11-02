@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<!-- Insert Project Title Below -->
-	<title>SOAR::DM HOME</title>
+	<title>SOAR::HOME</title>
 	<!-- Google Fonts -->
 	<!--
 		//Disabled: Currently using local copy
@@ -94,12 +94,13 @@ if(!session.isNew() && session.getAttribute("uname") != null){
     	<!-- Sidebar -->
         <div class="sidebar collapse">
         	<ul class="navigation">
-            	<li class="active"><a href="index.jsp"><i class="fa fa-laptop"></i> Dashboard</a></li>
+            	<li class="active"><a href="#"><i class="fa fa-laptop"></i> Dashboard</a></li>
             	<li>
         			<a href="#" class="expand"><i class="fa fa-table"></i> Tables</a>
 					<ul>
-                		<li><a href="#">Table 1</a></li>
-                		<li><a href="#">Table 2</a></li>
+                		<li><a href="#">Baseline Data</a></li>
+                		<li><a href="#">Midline Data</a></li>
+                		<li><a href="#">Endline Data</a></li>
                 	</ul>
         		</li>
                 <li>
@@ -123,15 +124,15 @@ if(!session.isNew() && session.getAttribute("uname") != null){
         <div class="page-content">
             <!-- Page title -->
         	<div class="page-title">
-                <h5><i class="fa fa-bars"></i>LAB Dashboard <small>Welcome, <% out.print(fname); %> </small></h5>
+                <h5><i class="fa fa-bars"></i> Dashboard <small>Welcome, <% out.print(fname); %> </small></h5>
             </div>
             <!-- /page title -->
             
             <!-- Statistics -->
             <ul class="row stats">
-                <li class="col-xs-3"><a id="idusers" href="#" class="btn btn-default">13</a> <span>Active Users</span></li>
+                <li class="col-xs-3"><a id="idresults" href="#" class="btn btn-default">13</a> <span>Records with Viral Load Results</span></li>
                 <li class="col-xs-3"><a id="idctcno" href="#" class="btn btn-default">52</a> <span>Records with CTC Number</span></li>
-                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">14</a> <span>Records with VIRAL Load</span></li>
+                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">14</a> <span>Records with Patient ID</span></li>
                 <li class="col-xs-3"><a id="idtotal" href="#" class="btn btn-default">48</a> <span>Total Records</span></li>
             </ul>
             <!-- /statistics -->
@@ -142,13 +143,27 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                     <h6 class="panel-title">Form Submissions</h6>
                 </div>
                 <div class="panel-body">
-                    <table id="tblOne"
-				        data-toggle="tblUserList"
-				        data-pagination="true"
-				        data-page-size="5"
-				        data-page-list="[5, 10, 20]"
-				        data-search="true" >         
-				   	</table>
+                    <!-- Serach control -->
+                <div class="row">
+                	<div class="rtl-inputs">
+                		<div class="col-md-4">
+                			<div class="input-group">
+	                           	<input id = "search" name="search" type="text" class="form-control" placeholder="Search Word">
+	                           	<span class="input-group-btn">
+	                           		<button id="searchBtn" class="btn btn-default" type="button">Search</button>
+	                           	</span>
+                            </div>
+                       	</div>
+                       	<div class="col-md-2">
+                                <select id="searchBy" name="searchBy" class="select">
+                                	<option value="FACILITY">Site</option>
+                                	<option value="VIRAL_ID">Patient ID</option>
+                                	<option value="CTC_NO">CTC Number</option>
+                                </select>
+                       	</div>
+                	</div>
+                </div>
+                <table id="tblOne"></table>
                 </div>
             </div>
             <!-- /form submission data -->
@@ -168,32 +183,51 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                             <div class="modal-body has-padding">
                                 <div class="form-group">
                                     <div class="row">
-                                    <div class="col-sm-6">
+                                    <div class="col-sm-4">
                                         <label for="sitename">Facility Name</label>
                                         <input name="sitename" type="text" placeholder="Eugene" class="form-control" readonly="readonly">
                                     </div>
+                                    <div class="col-sm-4">
+                                        <label for="viralid">Patient ID</label>
+                                        <input name="viralid" type="text" placeholder="XYZ-99-999" class="form-control" readonly="readonly">
+                                    </div>
+                                    <div class="col-sm-4">
+                                		<label for="tdate">Todays Date</label>
+                                    	<input name="tdate" type="text" placeholder="Date" class="form-control" readonly="readonly">
+                                	</div>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-sm-6">
-                                            <label for="viralid">Patient ID</label>
-                                            <input name="viralid" type="text" placeholder="XYZ-99-999" class="form-control" readonly="readonly">
+                                    	<div class="col-sm-4">
+                                            <label>VIRAL Load Type</label>
+				                          	<select id="vtype" name="vtype" class="select">
+				                          		<option value="DBS">DBS</option>
+				                                <option value="PLASMA">Plasma</option>
+				                           		<option value="WHOLE_BLOOD">Whole Blood</option>
+				                        	</select>
                                         </div>
-
-                                        <div class="col-sm-6">
-                                            <label>VIRO Load Results</label>
-                                            <input name="results" type="text" placeholder="VIRO Results" class="form-control">
+                                        <div class="col-sm-4">
+                                            <label>Sample Quality</label>
+                                            <input id="squality" name="squality" type="text" placeholder="Sample Quality" class="form-control">
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label>VIRAL Load Result</label>
+                                            <input id="results" name="results" type="text" placeholder="less than 1000" class="form-control">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                 	<div class="row">
-                                		<div class="col-sm-6">
-                                			<label for="tdate">Todays Date</label>
-                                            <input name="tdate" type="text" placeholder="Date" class="form-control" readonly="readonly">
-                                		</div>
+			                            <div class="col-sm-12">
+			                            <label>Comments</label>
+			                                <textarea id="comments" name="comments" rows="5" cols="5" class="form-control" placeholder="Enter your comments"></textarea>
+			                            </div>
+                                	</div>
+                                </div>
+                                <div class="form-group">
+                                	<div class="row">
                                 		<div class="col-sm-4">
                                 			<label>Physician Name</label>
                                             <input name="phyname" type="text" value="<% out.print(fname); %>" class="form-control" readonly="readonly">
@@ -211,8 +245,8 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                                 <button type="submit" class="btn btn-primary">Submit form</button>
                                 <input type="hidden" name="rtype" value="6">
                                 <input type="hidden" name="tablename" value="">
-                                <input type="hidden" name="colname" value="VIRAL_RESULTS">
                                 <input type="hidden" name="recid" value="">
+                                <input type="hidden" name="colname" value="VIRAL_RESULTS">
                                 <input type="hidden" name="dbase" value="<% out.print(dbase); %>">
                             </div>
 
@@ -232,12 +266,21 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 <script type="text/javascript" src="../js/plugins/interface/collapsible.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/bootstrap-table.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/validate.min.js"></script>
+<script type="text/javascript" src="../js/plugins/forms/select2.min.js"></script>
 <script>
 	$(document).ready(function(){
 		var today = new Date();
 		var RowIndex;
 		loadTable1();
 		loadSummary();
+		$("#searchBy").select2({
+			width:'100%',
+			minimumResultsForSearch: Infinity,
+			});
+		$("#vtype").select2({
+			width:'100%',
+			minimumResultsForSearch: Infinity,
+			});
 		$("#logout").click(function(){
 			$.ajax({
 				url:"../User",
@@ -246,32 +289,52 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			});
 			window.location.replace("../");
 		});
+		
+		//Add validation for results
+		//jQuery.validator.addMethod('viralResults', function (value) {
+	    //    return (value != "");
+	    //}, "Please complete viral results");
+		
+		$("#searchBtn").click(function(){
+			$("#tblOne").bootstrapTable('refresh');
+		});
 		$('#frmViroLoad').on('show.bs.modal', function () {
+			//Clean up previoud data if any
+			//$("select[name='results']").val(""); // this does not work!
+			//$("input[name='squality']").val("");
+			//$("textarea[name='comments']").val("");
+			//Input today's date
 			$("input[name='tdate']").val( today.toDateString() );
 		});
+
 		//Row Click
 	    $("#tblOne").on('click-row.bs.table', function(e, row, $element){
 	    	$("input[name='recid']").val(row['_URI']);
-	    	$("input[name='sitename']").val(row['HEALTH_FACILITY']);
+	    	$("input[name='sitename']").val(row['FACILITY']);
 	    	$("input[name='tablename']").val(row['TABLE_NAME']);
 	    	$("input[name='viralid']").val(row['VIRAL_ID']);
+	    	$("input[name='results']").val(row['VIRAL_RESULTS']);
+	    	$("input[name='squality']").val(row['VIRAL_QUALITY']);
+	    	$("select[name='vtype']").val(row['VIRAL_TYPE']);
+	    	$("textarea[name='comments']").val(row['VIRAL_COMMENTS']);
+	    	
 	    	RowIndex = $element.index();
 	    });
 		
 		$("#frmViro").validate({
 			rules:{
-				viro:{
-					required: true
-				},
 				initials:{
 					required: true,
 					minlength:2
+				},
+				results:{
+					required: true,
+					number: true,
+					max: 2000,
+					min: 100
 				}
 			},
 			messages:{
-				viro: {
-					required: "Required field"
-				},
 				initials:{
 					required: "Required field",
 					minlength: "Invalid"
@@ -285,12 +348,13 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				   	data: $(form).serialize(),
 				   	dataType : 'json',
 				   	success: function(data) {
-				   		updateTableCell(RowIndex,"VIRAL_RESULTS",$("input[name='results']").val());
+				   		updateTableCell(RowIndex,"VIRAL_RESULTS",$("#results").val());
+				   		updateTableCell(RowIndex,"VIRAL_COMMENTS",$("#comments").val());
+				   		updateTableCell(RowIndex,"VIRAL_QUALITY",$("#squality").val());
 	                    $("#frmViroLoad").modal('hide');
-	                    loadSummary();
 	                },
 	                error: function(xhr, ajaxOptions, thrownError){
-	                    validator.showErrors( {"viro": xhr.status + " " + thrownError });
+	                    validator.showErrors( {"viral": xhr.status + " " + thrownError });
 	                }
 				});
 				//form.preventDefault();
@@ -301,12 +365,13 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			$.ajax({
 				url	: "../User",
 				type: "POST",
-				data: "rtype=7&tablename=view_summary1",
+				data: "rtype=7",
 				datatype: "json",
 				success: function(data){
-					$("#idtotal").text(data.COUNT_REC);
-					$("#idctcno").text(data.COUNT_CTC);
-					$("#idviral").text(data.COUNT_VIRAL);
+					$("#idtotal").text(data.total_rec);
+					$("#idctcno").text(data.total_ctc);
+					$("#idviral").text(data.total_viral);
+					$("#idresults").text(data.total_results);
 				},
 				error: function(data){
 					
@@ -314,48 +379,81 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			});
 		}
 		function loadTable1(){
-			$.ajax({
-				url : "../User",
-				type: "POST",
-				data: "rtype=5&tablename=view_table1",
-				datatype: "json",
-				async: false,
-				success: function(data){
-					$("#tblOne").bootstrapTable({
-						data: data.rows,
-						columns: [{
-					    	field: 'REGION',
-					    	title: 'Region'
-					    },{
-					    	field: 'DISTRICT',
-					    	title: 'District',
-					    	sortable: true,
-					    	align: 'left'
-					    },{
-					    	field: 'HEALTH_FACILITY',
-					    	title: 'Health Facility',
-					    	sortable: true,
-					    	align: 'left'
-					    },{
-					    	field: 'VIRAL_ID',
-					    	title: 'Viral ID',
-					    	sortable: true,
-					    	align: 'left'
-					    },{
-					    	field: 'EDIT',
-					    	title: 'Edit',
-					    	align: 'center'
-					    },{
-					    	field: 'VIRAL_RESULTS',
-					    	title: 'Viral Results',
-					    	sortable: true,
-					    	align: 'center'
-					    }]
-					})
+			$("#tblOne").bootstrapTable({
+				url: "../View",
+				method: "post",
+				pagination: true,
+				sidePagination: "server",
+				contentType: 'application/x-www-form-urlencoded',
+				showColumns: true,
+				search: false,
+				pageSize: 10,
+            	pageList: [10, 25, 50, 100],
+            	showRefresh: true,
+				queryParams: function(p){
+				return{
+					rtype: 2,
+					tablename: "view_table1",
+					limit : this.pageSize,
+					offset: this.pageSize * (this.pageNumber - 1),
+					//search: this.searchText,
+					search : $("#search").val(),
+					searchBy: $("#searchBy").val(),
+					sort:	this.sortName,
+					order:  this.sortOrder
 				}
-				
-			});
+				},
+				columns: [{
+			    	field: 'REGION',
+			    	title: 'Region'
+			    },{
+			    	field: 'DISTRICT',
+			    	title: 'District',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
+			    	field: 'FACILITY',
+			    	title: 'Study Site',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
+			    	field: 'CTC_NO',
+			    	title: 'CTC No.',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
+			    	field: 'VIRAL_ID',
+			    	title: 'Patient ID',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
+			    	field: 'EDIT',
+			    	title: 'Edit',
+			    	align: 'center'
+			    },{
+			    	field: 'VIRAL_RESULTS',
+			    	title: 'Viral Results',
+			    	sortable: true,
+			    	align: 'center'
+			    },{
+			    	field: 'VIRAL_COMMENTS',
+			    	title: 'Comments',
+			    	sortable: false,
+			    	visible: false
+			    },{
+			    	field: 'VIRAL_QUALITY',
+			    	title: 'Sample Quality',
+			    	sortable: false,
+			    	visible: false
+			    },{
+			    	field: 'VIRAL_TYPE',
+			    	title: 'Sample Type',
+			    	sortable: false,
+			    	visible: false
+			    }]
+			})
 		}
+				
 		function updateTableCell(index,cellid,cellval){
 			$("#tblOne").bootstrapTable('updateCell', {
 				index: index,

@@ -11,10 +11,13 @@ public class UserRec {
 	private String _firstname;
 	private String _lastname;
 	private int _role;
+	private String _level;
+	private String _levelvalue;
 	private String _dbase;
 	private String _phone1;
 	private String _email;
 	private boolean _isAuthenticated;
+	private String _error;
 	
 	public int getUid(){
 		return _uid;
@@ -33,6 +36,18 @@ public class UserRec {
 	}
 	public void setPassword(String password){
 		_password = getMD5(password);
+	}
+	public String getLevel(){
+		return _level;
+	}
+	public void setLevel(String value){
+		_level = value;
+	}
+	public String getLevelValue(){
+		return _levelvalue;
+	}
+	public void setLevelValue(String value){
+		_levelvalue = value;
 	}
 	public boolean isAuthenticated(){
 		return _isAuthenticated;
@@ -92,5 +107,11 @@ public class UserRec {
             throw new RuntimeException(e);
         }
     }
+	public String getError(){
+		return _error;
+	}
+	public void setError(String value){
+		_error = value;
+	}
 
 }

@@ -5,7 +5,28 @@ public class ViroRec {
 	private String _recid;
 	private int _submitedBy;
 	private String _patientId;
+	private String _comments;
+	private String _type;
+	private String _quality;
 	
+	public String getComments(){
+		return _comments;
+	}
+	public void setComments(String value){
+		_comments = value;
+	}
+	public String getType(){
+		return _type;
+	}
+	public void setType(String value){
+		_type = value;
+	}
+	public String getQuality(){
+		return _quality;
+	}
+	public void setQuality(String value){
+		_quality = value;
+	}
 	public String getRecId(){
 		return _recid;
 	}
