@@ -228,6 +228,23 @@ public class User extends HttpServlet {
 					pw.close();
 				}
 				break;
+			case 8://Add CTC Details
+				CTCRec rec = new CTCRec();
+				rec.setId(request.getParameter("ctcno"));
+				rec.setRecId( request.getParameter("recid") );
+				
+				database  = request.getSession().getAttribute("dbase").toString();
+				tablename = request.getParameter("tablename");
+				
+				rec = UpdateCTC(rec,database,tablename); 
+				json =  new JSONObject();
+				json.put("success", rec.getSuccess());
+				json.put("message", rec.getMessage());
+				pw = response.getWriter();
+                pw.print(json.toString());
+                pw.close();
+				System.out.println("CTC No Updated");
+				break;
 			default:
 				break;
 			
@@ -353,6 +370,46 @@ public class User extends HttpServlet {
 		         se.printStackTrace();
 		      }//end finally try
 		}
+	}
+	protected CTCRec UpdateCTC(CTCRec ctc, String dbase, String dtable){
+		try{
+			db = new DbDetails();
+			cnn = db.getConn(dbase);
+			query = "UPDATE "+dtable+" SET CTC_ID=? WHERE _URI=?;";
+			pstm = cnn.prepareStatement(query);
+			pstm.setString(1, ctc.getId());
+			pstm.setString(2, ctc.getRecId());
+			
+			if (pstm.executeUpdate() == 1){
+				ctc.setSuccess(true);
+				ctc.setMessage("CTC Record Updated");
+				return ctc;
+			}else{
+				ctc.setSuccess(false);
+				ctc.setMessage("Failed to update CTC No");
+				return ctc;
+			}
+			
+		}catch(SQLException e){
+			e.printStackTrace();
+			ctc.setMessage("SQL Error, Failed to update CTC No");
+			return ctc;
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			try{
+		         if(pstm!=null)
+		            cnn.close();
+		      }catch(SQLException se){
+		      }// do nothing
+		      try{
+		         if(cnn!=null)
+		            cnn.close();
+		      }catch(SQLException se){
+		         se.printStackTrace();
+		      }//end finally try
+		}
+		return null;
 	}
 	protected boolean UpdateVIRO(ViroRec viro, String dbase, String dtable, String colname){
 		try{

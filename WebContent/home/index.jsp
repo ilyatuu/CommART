@@ -398,6 +398,11 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			    	title: 'Comments',
 			    	sortable: false,
 			    	visible: false
+			    },{
+			    	field: 'VIRAL_TYPE',
+			    	title: 'Sample Type',
+			    	sortable: false,
+			    	visible: false
 			    }]
 			})
 		}

@@ -362,6 +362,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				success: function(data){
 					$("#tblUserList").bootstrapTable({
 						data: data.rows,
+						pageSize: 10,
 						columns: [{
 					    	field: 'uname',
 					    	title: 'Username'

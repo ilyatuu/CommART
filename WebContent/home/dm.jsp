@@ -129,9 +129,9 @@ if(!session.isNew() && session.getAttribute("uname") != null){
             
             <!-- Statistics -->
             <ul class="row stats">
-                <li class="col-xs-3"><a id="idusers" href="#" class="btn btn-default">13</a> <span>Active Users</span></li>
+                <li class="col-xs-3"><a id="idresults" href="#" class="btn btn-default">13</a> <span>Records with Viral Load Results</span></li>
                 <li class="col-xs-3"><a id="idctcno" href="#" class="btn btn-default">52</a> <span>Records with CTC Number</span></li>
-                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">14</a> <span>Records with VIRAL Load</span></li>
+                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">14</a> <span>Records with Patient ID</span></li>
                 <li class="col-xs-3"><a id="idtotal" href="#" class="btn btn-default">48</a> <span>Total Records</span></li>
             </ul>
             <!-- /statistics -->
@@ -173,17 +173,17 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h5 class="modal-title">VIRAL Load Details</h5>
+                            <h5 class="modal-title">Update CTC Details</h5>
                         </div>
 
                         <!-- Form inside modal -->
-                        <form id="frmViro" action="../User" method="post" role="form">
+                        <form id="frmCTCInfo" action="../User" method="post" role="form">
 
                             <div class="modal-body has-padding">
                                 <div class="form-group">
                                     <div class="row">
                                     <div class="col-sm-6">
-                                        <label for="sitename">Facility Name</label>
+                                        <label for="sitename">Site Name</label>
                                         <input name="sitename" type="text" placeholder="Eugene" class="form-control" readonly="readonly">
                                     </div>
                                     </div>
@@ -198,7 +198,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 
                                         <div class="col-sm-6">
                                             <label>CTC Number</label>
-                                            <input name="results" type="text" placeholder="CTC Number" class="form-control">
+                                            <input name="ctcno" type="text" placeholder="Enter CTC Number" class="form-control">
                                         </div>
                                     </div>
                                 </div>
@@ -223,7 +223,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Submit form</button>
-                                <input type="hidden" name="rtype" value="6">
+                                <input type="hidden" name="rtype" value="8">
                                 <input type="hidden" name="tablename" value="">
                                 <input type="hidden" name="colname" value="CTC_No">
                                 <input type="hidden" name="recid" value="">
@@ -252,7 +252,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 		var today = new Date();
 		var RowIndex;
 		loadTable1();
-		//loadSummary();
+		loadSummary();
 		$("#searchBy").select2({
 			width:'100%',
 			minimumResultsForSearch: Infinity,
@@ -279,13 +279,14 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 		//Row Click
 	    $("#tblOne").on('click-row.bs.table', function(e, row, $element){
 	    	$("input[name='recid']").val(row['_URI']);
-	    	$("input[name='sitename']").val(row['HEALTH_FACILITY']);
+	    	$("input[name='sitename']").val(row['FACILITY']);
 	    	$("input[name='tablename']").val(row['TABLE_NAME']);
 	    	$("input[name='viralid']").val(row['VIRAL_ID']);
+	    	$("input[name='ctcno']").val(row['CTC_NO']);
 	    	RowIndex = $element.index();
 	    });
 		
-		$("#frmViro").validate({
+		$("#frmCTCInfo").validate({
 			rules:{
 				viro:{
 					required: true
@@ -312,9 +313,9 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				   	data: $(form).serialize(),
 				   	dataType : 'json',
 				   	success: function(data) {
-				   		updateTableCell(RowIndex,"CTC_NO",$("input[name='results']").val());
+				   		updateTableCell(RowIndex,"CTC_NO",$("input[name='ctcno']").val());
 	                    $("#frmViroLoad").modal('hide');
-	                    //loadSummary();
+	                    
 	                },
 	                error: function(xhr, ajaxOptions, thrownError){
 	                    validator.showErrors( {"viro": xhr.status + " " + thrownError });
@@ -328,12 +329,13 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			$.ajax({
 				url	: "../User",
 				type: "POST",
-				data: "rtype=7&tablename=view_summary1",
+				data: "rtype=7",
 				datatype: "json",
 				success: function(data){
-					$("#idtotal").text(data.COUNT_REC);
-					$("#idctcno").text(data.COUNT_CTC);
-					$("#idviral").text(data.COUNT_VIRAL);
+					$("#idtotal").text(data.total_rec);
+					$("#idctcno").text(data.total_ctc);
+					$("#idviral").text(data.total_viral);
+					$("#idresults").text(data.total_results);
 				},
 				error: function(data){
 					
@@ -366,38 +368,53 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				}
 				},
 				columns: [{
-				   	field: 'REGION',
+			    	field: 'REGION',
 			    	title: 'Region'
 			    },{
-				   	field: 'DISTRICT',
-				   	title: 'District',
-				   	sortable: true,
-				   	align: 'left'
+			    	field: 'DISTRICT',
+			    	title: 'District',
+			    	sortable: true,
+			    	align: 'left'
 			    },{
-				   	field: 'FACILITY',
-				   	title: 'Health Facility',
-				   	sortable: true,
-				   	align: 'left'
-			   },{
-				  	field: 'VIRAL_ID',
-				   	title: 'Viral ID',
-				   	sortable: true,
-				  	align: 'left'
+			    	field: 'FACILITY',
+			    	title: 'Study Site',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
+			    	field: 'VIRAL_ID',
+			    	title: 'Patient ID',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
+			    	field: 'CTC_NO',
+			    	title: 'CTC No.',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
+			    	field: 'EDIT',
+			    	title: 'Edit',
+			    	align: 'center'
 			    },{
 			    	field: 'VIRAL_RESULTS',
 			    	title: 'Viral Results',
 			    	sortable: true,
 			    	align: 'center'
 			    },{
-			    	field: 'EDIT',
-			    	title: 'Edit',
-			    	align: 'center'
+			    	field: 'VIRAL_COMMENTS',
+			    	title: 'Comments',
+			    	sortable: false,
+			    	visible: false
 			    },{
-				  	field: 'CTC_NO',
-				  	title: 'CTC Number',
-				  	align: 'center',
-				  	sortable: true
-			   }]
+			    	field: 'VIRAL_QUALITY',
+			    	title: 'Sample Quality',
+			    	sortable: false,
+			    	visible: false
+			    },{
+			    	field: 'VIRAL_TYPE',
+			    	title: 'Sample Type',
+			    	sortable: false,
+			    	visible: false
+			    }]
 			})
 		}
 				
