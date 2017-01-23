@@ -193,6 +193,7 @@ public class User extends HttpServlet {
 				viro.setType(request.getParameter("vtype"));
 				viro.setQuality(request.getParameter("squality"));
 				viro.setSubmitedBy( (Integer)request.getSession().getAttribute("uid") );
+				viro.setSubmitedOn(request.getParameter("tdate"));
 				
 				json =  new JSONObject();
 				
@@ -415,14 +416,15 @@ public class User extends HttpServlet {
 		try{
 			db = new DbDetails();
 			cnn = db.getConn(dbase);
-			query = "UPDATE "+dtable+" SET VIRAL_RESULTS=?, VIRAL_COMMENTS=?,VIRAL_QUALITY=?, VIRAL_TYPE=?, SUBMITED_BY=? WHERE _URI=?;";
+			query = "UPDATE "+dtable+" SET VIRAL_RESULTS=?, VIRAL_COMMENTS=?,VIRAL_QUALITY=?, VIRAL_TYPE=?, SUBMITED_BY=?, SUBMITTED_ON=? WHERE _URI=?;";
 			pstm = cnn.prepareStatement(query);
 			pstm.setString(1, viro.getResults());
 			pstm.setString(2, viro.getComments());
 			pstm.setString(3, viro.getQuality());
 			pstm.setString(4, viro.getType());
 			pstm.setInt(5, viro.getSubmitedBy());
-			pstm.setString(6, viro.getRecId());
+			pstm.setString(6, viro.getSubmitedON());
+			pstm.setString(7, viro.getRecId());
 			
 			//Log Update
 			System.out.println(pstm.toString());

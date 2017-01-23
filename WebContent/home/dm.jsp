@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -129,10 +129,10 @@ if(!session.isNew() && session.getAttribute("uname") != null){
             
             <!-- Statistics -->
             <ul class="row stats">
-                <li class="col-xs-3"><a id="idresults" href="#" class="btn btn-default">13</a> <span>Records with Viral Load Results</span></li>
-                <li class="col-xs-3"><a id="idctcno" href="#" class="btn btn-default">52</a> <span>Records with CTC Number</span></li>
-                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">14</a> <span>Records with Patient ID</span></li>
-                <li class="col-xs-3"><a id="idtotal" href="#" class="btn btn-default">48</a> <span>Total Records</span></li>
+                <li class="col-xs-3"><a id="idresults" href="#" class="btn btn-default">0</a> <span>Records with Viral Load Results</span></li>
+                <li class="col-xs-3"><a id="idctcno" href="#" class="btn btn-default">0</a> <span>Records with CTC Number</span></li>
+                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">0</a> <span>Participants agreed to participate</span></li>
+                <li class="col-xs-3"><a id="idtotal" href="#" class="btn btn-default">0</a> <span>Total Records</span></li>
             </ul>
             <!-- /statistics -->
             
@@ -142,7 +142,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                     <h6 class="panel-title">Form Submissions</h6>
                 </div>
                 <div class="panel-body">
-                    <!-- Serach control -->
+                <!-- Serach control -->
                 <div class="row">
                 	<div class="rtl-inputs">
                 		<div class="col-md-4">
@@ -156,8 +156,8 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                        	<div class="col-md-2">
                                 <select id="searchBy" name="searchBy" class="select">
                                 	<option value="FACILITY">Site</option>
-                                	<option value="VIRAL_ID">Viral ID</option>
                                 	<option value="CTC_NO">CTC Number</option>
+                                	<option value="PARTICIPANT_ID">Participant ID</option>
                                 </select>
                        	</div>
                 	</div>
@@ -209,7 +209,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                                             <input name="tdate" type="text" placeholder="Date" class="form-control" readonly="readonly">
                                 		</div>
                                 		<div class="col-sm-4">
-                                			<label>Physician Name</label>
+                                			<label>Site Manager</label>
                                             <input name="phyname" type="text" value="<% out.print(fname); %>" class="form-control" readonly="readonly">
                                 		</div>
                                 		<div class="col-sm-2">
@@ -281,7 +281,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 	    	$("input[name='recid']").val(row['_URI']);
 	    	$("input[name='sitename']").val(row['FACILITY']);
 	    	$("input[name='tablename']").val(row['TABLE_NAME']);
-	    	$("input[name='viralid']").val(row['VIRAL_ID']);
+	    	$("input[name='viralid']").val(row['PARTICIPANT_ID']);
 	    	$("input[name='ctcno']").val(row['CTC_NO']);
 	    	RowIndex = $element.index();
 	    });
@@ -381,8 +381,13 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			    	sortable: true,
 			    	align: 'left'
 			    },{
+			    	field: 'PARTICIPANT_ID',
+			    	title: 'Participant ID',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
 			    	field: 'VIRAL_ID',
-			    	title: 'Patient ID',
+			    	title: 'Viral ID',
 			    	sortable: true,
 			    	align: 'left'
 			    },{
@@ -396,7 +401,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			    	align: 'center'
 			    },{
 			    	field: 'VIRAL_RESULTS',
-			    	title: 'Viral Results',
+			    	title: 'Viral Results (Copies/ML)',
 			    	sortable: true,
 			    	align: 'center'
 			    },{

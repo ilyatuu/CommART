@@ -170,9 +170,9 @@ public class View extends HttpServlet {
 			//Integrate user organization group
 			if(!usr.getString("level").equalsIgnoreCase("country")){
 				if(!opt.getString("search").isEmpty()){
-					query = query.replace(";", "")+" AND "+usr.getString("level")+" like '"+ usr.getString("levelvalue")+"';";
+					query = query.replace(";", "")+" AND "+usr.getString("level")+" like '%"+ usr.getString("levelvalue")+"%';";
 				}else{
-					query = query.replace(";", "")+" WHERE "+usr.getString("level")+" like '"+ usr.getString("levelvalue")+"';";
+					query = query.replace(";", "")+" WHERE "+usr.getString("level")+" like '%"+ usr.getString("levelvalue")+"%';";
 				}	
 			}
 			System.out.println(query);
@@ -239,7 +239,7 @@ public class View extends HttpServlet {
 			
 			if(!usr.getString("level").equalsIgnoreCase("country")){
 				if(!usr.getString("level").isEmpty() && !usr.getString("level").isEmpty()){
-					query = query.replace(";", "")+" WHERE "+usr.getString("level")+" like '"+ usr.getString("levelvalue")+"';";
+					query = query.replace(";", "")+" WHERE "+usr.getString("level")+" like '%"+ usr.getString("levelvalue")+"%';";
 				}
 
 			}

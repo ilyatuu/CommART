@@ -85,7 +85,9 @@ public class Controls extends HttpServlet {
 		try{
 			db = new DbDetails();
 			cnn = db.getConn();
-			query = "SELECT id,name FROM _orgunit WHERE levelid = 1;";
+			
+			//National
+			query = "SELECT id,name FROM _orgunit WHERE levelid = 0;";
 			pstm = cnn.prepareStatement(query);
 			rset = pstm.executeQuery();
 			
@@ -99,6 +101,22 @@ public class Controls extends HttpServlet {
 			
 			//Store return value
 			JSONObject jtable = new JSONObject();
+			jtable.put("country", jarr);
+			
+			//Region
+			query = "SELECT id,name FROM _orgunit WHERE levelid = 1;";
+			pstm = cnn.prepareStatement(query);
+			rset = pstm.executeQuery();
+			
+			jarr = new JSONArray();
+			while(rset.next()){
+				json = new JSONObject();
+				json.put("id", rset.getInt("id"));
+				json.put("name", rset.getString("name"));
+				jarr.put(json);
+			}
+			
+			//Store return value
 			jtable.put("regions", jarr);
 			
 			// Get level 2 Organization Units
@@ -130,7 +148,7 @@ public class Controls extends HttpServlet {
 				jarr.put(json);
 			}
 			//Store return value
-			jtable.put("sites", jarr);
+			jtable.put("facility", jarr);
 			
 			return jtable;
 		}catch(JSONException e){

@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -130,10 +130,10 @@ if(!session.isNew() && session.getAttribute("uname") != null){
             
             <!-- Statistics -->
             <ul class="row stats">
-                <li class="col-xs-3"><a id="idresults" href="#" class="btn btn-default">13</a> <span>Records with Viral Load Results</span></li>
-                <li class="col-xs-3"><a id="idctcno" href="#" class="btn btn-default">52</a> <span>Records with CTC Number</span></li>
-                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">14</a> <span>Records with Patient ID</span></li>
-                <li class="col-xs-3"><a id="idtotal" href="#" class="btn btn-default">48</a> <span>Total Records</span></li>
+                <li class="col-xs-3"><a id="idresults" href="#" class="btn btn-default">0</a> <span>Records with Viral Load Results</span></li>
+                <li class="col-xs-3"><a id="idctcno" href="#" class="btn btn-default">0</a> <span>Records with CTC Number</span></li>
+                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">0</a> <span>Participants agreed to participate</span></li>
+                <li class="col-xs-3"><a id="idtotal" href="#" class="btn btn-default">0</a> <span>Total Records</span></li>
             </ul>
             <!-- /statistics -->
             
@@ -210,11 +210,16 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                                         </div>
                                         <div class="col-sm-4">
                                             <label>Sample Quality</label>
-                                            <input id="squality" name="squality" type="text" placeholder="Sample Quality" class="form-control">
+                                            <select id="squality" name="squality" class="select">
+                                            	<option value="None">Select One</option>
+                                            	<option value="Poor">Poor</option>
+                                            	<option value="Good">Good</option>
+                                            	<option value="Excellent">Excellent</option>
+                                            </select>
                                         </div>
                                         <div class="col-sm-4">
                                             <label>VIRAL Load Result</label>
-                                            <input id="results" name="results" type="text" placeholder="less than 1000" class="form-control">
+                                            <input id="results" name="results" type="text" placeholder="Numeric Count" class="form-control">
                                         </div>
                                     </div>
                                 </div>
@@ -281,6 +286,10 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			width:'100%',
 			minimumResultsForSearch: Infinity,
 			});
+		$("#squality").select2({
+			width:'100%',
+			minimumResultsForSearch: Infinity,
+			});
 		$("#logout").click(function(){
 			$.ajax({
 				url:"../User",
@@ -329,9 +338,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				},
 				results:{
 					required: true,
-					number: true,
-					max: 2000,
-					min: 100
+					number: true
 				}
 			},
 			messages:{
@@ -422,8 +429,13 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			    	sortable: true,
 			    	align: 'left'
 			    },{
+			    	field: 'PARTICIPANT_ID',
+			    	title: 'Participant ID',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
 			    	field: 'VIRAL_ID',
-			    	title: 'Patient ID',
+			    	title: 'Viral ID',
 			    	sortable: true,
 			    	align: 'left'
 			    },{
@@ -432,7 +444,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			    	align: 'center'
 			    },{
 			    	field: 'VIRAL_RESULTS',
-			    	title: 'Viral Results',
+			    	title: 'Viral Results (Copies/ML)',
 			    	sortable: true,
 			    	align: 'center'
 			    },{

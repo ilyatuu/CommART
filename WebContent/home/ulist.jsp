@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -142,6 +142,9 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                             <div class="col-md-3">
                                 <input name="password" type="password" class="form-control" placeholder="Password">
                             </div>
+                            <div class="col-md-3">
+                                <input name="dbase" type="text" class="form-control" placeholder="Database">
+                            </div>
             			</div>
             			<div class="form-group">
             				<div class="col-md-3">
@@ -168,7 +171,6 @@ if(!session.isNew() && session.getAttribute("uname") != null){
             				<input type="reset" value="Reset" class="btn btn-primary">
                             <input type="submit" value="Add User" class="btn btn-primary">
                             <input type="hidden" name="rtype" value="4">
-                            <input type="hidden" name="dbase" value="odk_viro">
                             <input type="hidden" name="level" value="">
                             <input type="hidden" name="levelvalue" value="">
                         </div>
@@ -274,6 +276,9 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				},
 				orgunit:{
 					selectSite: true
+				},
+				dbase:{
+					required: true
 				}
 			},
 			messages:{
@@ -328,6 +333,13 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				data: "rtype=1",
 				datatype: "json",
 				success: function(data){
+					//Country
+					html = "<optgroup name='country' label='Country'>";
+					$.each(data.country, function(key, val){
+						html += "<option value=" + val.id + ">" + val.name + "</option>";
+				    })
+				    html +="</optgroup>"
+				    $("#orgunit").append(html);
 					//Region
 					html = "<optgroup name='region' label='Region'>";
 					$.each(data.regions, function(key, val){
@@ -343,8 +355,8 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				    html +="</optgroup>"
 				    $("#orgunit").append(html);
 					//Site
-					html = "<optgroup name='site' label='Site'>";
-					$.each(data.sites, function(key, val){
+					html = "<optgroup name='facility' label='Facility'>";
+					$.each(data.facility, function(key, val){
 						html += "<option value=" + val.id + ">" + val.name + "</option>";
 				    })
 				    html +="</optgroup>"

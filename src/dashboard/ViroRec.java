@@ -8,6 +8,7 @@ public class ViroRec {
 	private String _comments;
 	private String _type;
 	private String _quality;
+	private String _submitedOn;
 	
 	public String getComments(){
 		return _comments;
@@ -50,5 +51,11 @@ public class ViroRec {
 	}
 	public int getSubmitedBy(){
 		return _submitedBy;
+	}
+	public String getSubmitedON(){
+		return _submitedOn;
+	}
+	public void setSubmitedOn(String value){
+		_submitedOn = value;
 	}
 }
