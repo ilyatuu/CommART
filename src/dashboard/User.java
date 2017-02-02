@@ -13,6 +13,7 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import org.apache.commons.codec.binary.Base32;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -44,7 +45,8 @@ public class User extends HttpServlet {
 	
 	String colname	= "";
 	String tablename= "";
-	String database = ""; 
+	String database = "";
+	String skey = "";
 	
 	DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	Date date = new Date();
@@ -83,15 +85,25 @@ public class User extends HttpServlet {
 				if(request.getParameterMap().containsKey("username") && request.getParameterMap().containsKey("password")){
 					UserRec user = Login(request.getParameter("username"), request.getParameter("password"));
 					if(user.isAuthenticated()){
+						
+						//Set login key
+		                Base32 base32 = new Base32();
+		                skey = base32.encodeAsString( user.getUsername().getBytes() );
+		                
 						session = request.getSession(true);
 						session.setAttribute("uid", user.getUid());
+						session.setAttribute("key", skey);
 		                session.setAttribute("uname", user.getUsername());
 		                session.setAttribute("fname", user.getFirstname());
 		                session.setAttribute("lname", user.getLastname());
 		                session.setAttribute("dbase", user.getDBase());
+		                session.setAttribute("urole", user.getRole());
 		                session.setAttribute("level", user.getLevel());
 		                session.setAttribute("levelvalue", user.getLevelValue());
 		                session.setMaxInactiveInterval(30*60);
+		                
+		                
+		                
 		                
 		                response.setContentType("application/json;charset=utf-8");
 		                json = new JSONObject();
@@ -101,6 +113,7 @@ public class User extends HttpServlet {
 		                json.put("success", true);
 		                json.put("process", "login");
 		                json.put("dbase",user.getDBase());
+		                json.put("key",skey);
 		                
 		                switch(user.getRole()){
 		                case 1: //Administrator

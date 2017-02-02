@@ -73,12 +73,9 @@
     <!-- Scripts -->
     <script src="js/jquery.min.js"></script>
     <script src="js/jquery.validate.min.js"></script>
+    <script src="js/md5.min.js"></script>
     <script>
  		$(document).ready(function(){
- 			
- 			$("#btnLogin").click(function() {
- 				alert("Hellow");
- 			});
  			
  			$("#frmLogin").validate({
  				rules:{
@@ -111,7 +108,7 @@
  				        dataType : 'json'
  					}).done(function (data) {
  				        if (data.success) {               
- 				        	window.location.replace("home/"+data.page+"?sid="+data.sid+"&dbase="+data.dbase);
+ 				        	window.location.replace("home/"+data.page+"?sid="+data.sid+"&dbase="+data.dbase+"&skey="+data.key);
  				        } else {
  				           validator.showErrors( {"password": data.message});
  				        }

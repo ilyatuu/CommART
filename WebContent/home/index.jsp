@@ -20,6 +20,8 @@
 <%
 String sid1   = "";
 String sid2   = "";
+String skey1 = "";
+String skey2 = "";
 String uname  = "";
 String fname  = "";
 String lname  = "";
@@ -28,13 +30,20 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 	if(request.getParameterMap().containsKey("sid")){
 		sid1 = request.getSession().getId();
 		sid2 = request.getParameter("sid");
+		skey1 = session.getAttribute("key").toString();
+		skey2 = request.getParameter("key");
+		
+		Integer urole = (Integer) session.getAttribute("urole");
+		
 		uname  = session.getAttribute("uname").toString();
 		dbase  = session.getAttribute("dbase").toString();
 		fname  = session.getAttribute("fname").toString();
 		lname  = (session.getAttribute("lname") == null) ? "":session.getAttribute("lname").toString();
 		fname  = fname + " " + lname; 
-		if( !sid1.equals(sid2) ){
-			response.sendRedirect("index.html?msg='Forbidden 1'");
+		
+		//User roles: 1-Administrator 2-Data Mager 3-Lab Technician
+		if( !sid1.equals(sid2) || urole != 1){
+			response.sendRedirect("../index.html?msg='Forbidden 1'");
 		}
 		
 	}else{
@@ -66,7 +75,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                 <ul class="nav navbar-nav navbar-right-custom">
                     <li class="user dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown">
-                            <span> <% out.print(fname); %></span><i class="caret"></i>
+                            <span> <% out.print(fname); %> &nbsp;</span><i class="caret"></i>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a href="#"><i class="fa fa-user"></i> Profile</a></li>
@@ -250,6 +259,25 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 <script type="text/javascript" src="../js/plugins/forms/select2.min.js"></script>
 <script>
 	$(document).ready(function(){
+		$('.dropdown, .btn-group').on('show.bs.dropdown', function(e){
+			$(this).find('.dropdown-menu').first().stop(true, true).fadeIn(100);
+		});
+
+		$('.dropdown, .btn-group').on('hide.bs.dropdown', function(e){
+			$(this).find('.dropdown-menu').first().stop(true, true).fadeOut(100);
+		});
+
+		$('.expand').collapsible({
+			defaultOpen: 'second-level,third-level',
+			cssOpen: 'level-opened',
+			cssClose: 'level-closed',
+			speed: 150
+		});
+		
+		$('.sidebar-toggle').click(function () {
+			$('.page-container').toggleClass('hidden-sidebar');
+		});
+		
 		var today = new Date();
 		var RowIndex;
 		loadTable1();
@@ -421,6 +449,5 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 		}
 	});
 </script>
-<script src="../js/application.js"></script>
 </body>
 </html>
