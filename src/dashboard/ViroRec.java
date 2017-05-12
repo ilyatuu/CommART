@@ -9,6 +9,7 @@ public class ViroRec {
 	private String _type;
 	private String _quality;
 	private String _submitedOn;
+	private boolean _deceased;
 	
 	public String getComments(){
 		return _comments;
@@ -57,5 +58,11 @@ public class ViroRec {
 	}
 	public void setSubmitedOn(String value){
 		_submitedOn = value;
+	}
+	public void setDeceased(boolean value){
+		_deceased = value;
+	}
+	public boolean getDeceased(){
+		return _deceased;
 	}
 }

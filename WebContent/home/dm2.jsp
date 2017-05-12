@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<!-- Insert Project Title Below -->
-	<title>SOAR::DM HOME</title>
+	<title>SOAR::HOME</title>
 	<!-- Google Fonts -->
 	<!--
 		//Disabled: Currently using local copy
@@ -20,6 +20,8 @@
 <%
 String sid1   = "";
 String sid2   = "";
+String skey1 = "";
+String skey2 = "";
 String uname  = "";
 String fname  = "";
 String lname  = "";
@@ -28,14 +30,20 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 	if(request.getParameterMap().containsKey("sid")){
 		sid1 = request.getSession().getId();
 		sid2 = request.getParameter("sid");
+		skey1 = session.getAttribute("key").toString();
+		skey2 = request.getParameter("key");
+		
+		Integer urole = (Integer) session.getAttribute("urole");
+		
 		uname  = session.getAttribute("uname").toString();
 		dbase  = session.getAttribute("dbase").toString();
 		fname  = session.getAttribute("fname").toString();
 		lname  = (session.getAttribute("lname") == null) ? "":session.getAttribute("lname").toString();
-		fname  = fname + " " + lname;
+		fname  = fname + " " + lname; 
 		
-		if( !sid1.equals(sid2) ){
-			response.sendRedirect("index.html?msg='Forbidden 1'");
+		//User roles: 1-Administrator 2-Data Mager 3-Lab Technician
+		if( !sid1.equals(sid2) || urole == 3){
+			response.sendRedirect("../index.html?msg='Forbidden1'");
 		}
 		
 	}else{
@@ -67,7 +75,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                 <ul class="nav navbar-nav navbar-right-custom">
                     <li class="user dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown">
-                            <span> <% out.print(fname); %></span><i class="caret"></i>
+                            <span> <% out.print(fname); %> &nbsp;</span><i class="caret"></i>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a href="#"><i class="fa fa-user"></i> Profile</a></li>
@@ -95,12 +103,12 @@ if(!session.isNew() && session.getAttribute("uname") != null){
     	<!-- Sidebar -->
         <div class="sidebar collapse">
         	<ul class="navigation">
-            	<li class="active"><a href="index.jsp"><i class="fa fa-laptop"></i> Dashboard</a></li>
+            	<li class="active"><a href="#"><i class="fa fa-laptop"></i> Dashboard </a></li>
             	<li>
         			<a href="#" class="expand"><i class="fa fa-table"></i> Tables</a>
 					<ul>
-                		<li><a href="#">Table 1</a></li>
-                		<li><a href="#">Table 2</a></li>
+                		<li><a href="#" id="change_table" data-param1=<%=sid1%> data-param2=<%=dbase %>>Baseline V1</a></li>
+                		<li><a href="#">Midline Data</a></li>
                 	</ul>
         		</li>
                 <li>
@@ -124,16 +132,16 @@ if(!session.isNew() && session.getAttribute("uname") != null){
         <div class="page-content">
             <!-- Page title -->
         	<div class="page-title">
-                <h5><i class="fa fa-bars"></i>DM Dashboard <small>Welcome, <% out.print(fname); %> </small></h5>
+                <h5><i class="fa fa-bars"></i> Baseline V2 : <small>Welcome, <% out.print(fname); %> </small></h5>
             </div>
             <!-- /page title -->
             
             <!-- Statistics -->
-             <ul class="row stats">
-                <li class="col-xs-3"><a id="idusers" href="#" class="btn btn-default">13</a> <span>Active Users</span></li>
-                <li class="col-xs-3"><a id="idctcno" href="#" class="btn btn-default">52</a> <span>Records with CTC Number</span></li>
-                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">14</a> <span>Records with VIRAL Load</span></li>
-                <li class="col-xs-3"><a id="idtotal" href="#" class="btn btn-default">48</a> <span>Total Records</span></li>
+            <ul class="row stats">
+                <li class="col-xs-3"><a id="idresults" href="#" class="btn btn-default">0</a> <span>Records with Viral Load Results</span></li>
+                <li class="col-xs-3"><a id="idctcno" href="#" class="btn btn-default">0</a> <span>Records with CTC Number</span></li>
+                <li class="col-xs-3"><a id="idviral" href="#" class="btn btn-default">0</a> <span>Participants agreed to participate</span></li>
+                <li class="col-xs-3"><a id="idtotal" href="#" class="btn btn-default">0</a> <span>Total Records</span></li>
             </ul>
             <!-- /statistics -->
             
@@ -143,29 +151,48 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                     <h6 class="panel-title">Form Submissions</h6>
                 </div>
                 <div class="panel-body">
-                    <table id="tblOne">
-				   	</table>
+                <!-- Serach control -->
+                <div class="row">
+                	<div class="rtl-inputs">
+                		<div class="col-md-4">
+                			<div class="input-group">
+	                           	<input id = "search" name="search" type="text" class="form-control" placeholder="Search Word">
+	                           	<span class="input-group-btn">
+	                           		<button id="searchBtn" class="btn btn-default" type="button">Search</button>
+	                           	</span>
+                            </div>
+                       	</div>
+                       	<div class="col-md-2">
+                                <select id="searchBy" name="searchBy" class="select">
+                                	<option value="FACILITY">Site</option>
+                                	<option value="CTC_NO">CTC Number</option>
+                                	<option value="PARTICIPANT_ID">Participant ID</option>
+                                </select>
+                       	</div>
+                	</div>
+                </div>
+                <table id="tblOne"></table>
                 </div>
             </div>
             <!-- /form submission data -->
             
-             <!-- Edit Link: Form Modal -->
+            <!-- Edit CTC Info Link: Form Modal -->
             <div id="frmViroLoad" class="modal fade" tabindex="-1" role="dialog">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h5 class="modal-title">VIRAL Load Details</h5>
+                            <h5 class="modal-title">Update CTC Details</h5>
                         </div>
 
                         <!-- Form inside modal -->
-                        <form id="frmViro" action="../User" method="post" role="form">
+                        <form id="frmCTCInfo" action="../User" method="post" role="form">
 
                             <div class="modal-body has-padding">
                                 <div class="form-group">
                                     <div class="row">
                                     <div class="col-sm-6">
-                                        <label for="sitename">Facility Name</label>
+                                        <label for="sitename">Site Name</label>
                                         <input name="sitename" type="text" placeholder="Eugene" class="form-control" readonly="readonly">
                                     </div>
                                     </div>
@@ -180,7 +207,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 
                                         <div class="col-sm-6">
                                             <label>CTC Number</label>
-                                            <input name="results" type="text" placeholder="CTC Number" class="form-control">
+                                            <input name="ctcno" type="text" placeholder="Enter CTC Number" class="form-control">
                                         </div>
                                     </div>
                                 </div>
@@ -191,7 +218,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                                             <input name="tdate" type="text" placeholder="Date" class="form-control" readonly="readonly">
                                 		</div>
                                 		<div class="col-sm-4">
-                                			<label>Physician Name</label>
+                                			<label>Site Manager</label>
                                             <input name="phyname" type="text" value="<% out.print(fname); %>" class="form-control" readonly="readonly">
                                 		</div>
                                 		<div class="col-sm-2">
@@ -205,7 +232,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Submit form</button>
-                                <input type="hidden" name="rtype" value="6">
+                                <input type="hidden" name="rtype" value="8">
                                 <input type="hidden" name="tablename" value="">
                                 <input type="hidden" name="colname" value="CTC_No">
                                 <input type="hidden" name="recid" value="">
@@ -228,12 +255,20 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 <script type="text/javascript" src="../js/plugins/interface/collapsible.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/bootstrap-table.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/validate.min.js"></script>
+<script type="text/javascript" src="../js/plugins/forms/select2.min.js"></script>
 <script>
 	$(document).ready(function(){
 		var today = new Date();
 		var RowIndex;
 		loadTable1();
-		//loadSummary();
+		loadSummary();
+		$("#searchBy").select2({
+			width:'100%',
+			minimumResultsForSearch: Infinity,
+		});
+		$("#change_table").click(function(){
+			window.location.replace("dm.jsp?sid="+ $(this).attr('data-param1')+"&dbase"+$(this).attr('data-param2'));
+		});
 		$("#logout").click(function(){
 			$.ajax({
 				url:"../User",
@@ -242,20 +277,28 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			});
 			window.location.replace("../");
 		});
+		$("#searchBtn").click(function(){
+			$("#tblOne").bootstrapTable('refresh');
+		});
 		$('#frmViroLoad').on('show.bs.modal', function () {
 			$("input[name='tdate']").val( today.toDateString() );
 			$("input[name='results']").val( "" );
 		});
+		//Refresh
+		$("#tblOne").on('refresh.bs.table', function(){
+			alert("hellow");
+		});
 		//Row Click
 	    $("#tblOne").on('click-row.bs.table', function(e, row, $element){
 	    	$("input[name='recid']").val(row['_URI']);
-	    	$("input[name='sitename']").val(row['HEALTH_FACILITY']);
+	    	$("input[name='sitename']").val(row['FACILITY']);
 	    	$("input[name='tablename']").val(row['TABLE_NAME']);
-	    	$("input[name='viralid']").val(row['VIRAL_ID']);
+	    	$("input[name='viralid']").val(row['PARTICIPANT_ID']);
+	    	$("input[name='ctcno']").val(row['CTC_NO']);
 	    	RowIndex = $element.index();
 	    });
 		
-		$("#frmViro").validate({
+		$("#frmCTCInfo").validate({
 			rules:{
 				viro:{
 					required: true
@@ -282,9 +325,9 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				   	data: $(form).serialize(),
 				   	dataType : 'json',
 				   	success: function(data) {
-				   		updateTableCell(RowIndex,"CTC_NO",$("input[name='results']").val());
+				   		updateTableCell(RowIndex,"CTC_NO",$("input[name='ctcno']").val());
 	                    $("#frmViroLoad").modal('hide');
-	                    loadSummary();
+	                    
 	                },
 	                error: function(xhr, ajaxOptions, thrownError){
 	                    validator.showErrors( {"viro": xhr.status + " " + thrownError });
@@ -298,12 +341,13 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			$.ajax({
 				url	: "../User",
 				type: "POST",
-				data: "rtype=7&tablename=view_summary1",
+				data: "rtype=7&tablename=view_table2",
 				datatype: "json",
 				success: function(data){
-					$("#idtotal").text(data.COUNT_REC);
-					$("#idctcno").text(data.COUNT_CTC);
-					$("#idviral").text(data.COUNT_VIRAL);
+					$("#idtotal").text(data.total_rec);
+					$("#idctcno").text(data.total_ctc);
+					$("#idviral").text(data.total_viral);
+					$("#idresults").text(data.total_results);
 				},
 				error: function(data){
 					
@@ -312,27 +356,28 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 		}
 		function loadTable1(){
 			$("#tblOne").bootstrapTable({
-				height: 400,
 				url: "../View",
 				method: "post",
 				pagination: true,
 				sidePagination: "server",
 				contentType: 'application/x-www-form-urlencoded',
 				showColumns: true,
-				search: true,
-				pageSize: 5,
-                pageList: [5, 10, 25, 50, 100],
-                showRefresh: true,
+				search: false,
+				pageSize: 10,
+            	pageList: [10, 25, 50, 100],
+            	showRefresh: true,
 				queryParams: function(p){
-					return{
-						rtype: 2,
-						tablename: "view_table1",
-						limit : this.pageSize,
-						offset: this.pageSize * (this.pageNumber - 1),
-						search: this.searchText,
-						sort:	this.sortName,
-						order:  this.sortOrder
-					}
+				return{
+					rtype: 2,
+					tablename: "view_table2",
+					limit : this.pageSize,
+					offset: this.pageSize * (this.pageNumber - 1),
+					//search: this.searchText,
+					search : $("#search").val(),
+					searchBy: $("#searchBy").val(),
+					sort:	this.sortName,
+					order:  this.sortOrder
+				}
 				},
 				columns: [{
 			    	field: 'REGION',
@@ -343,8 +388,13 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			    	sortable: true,
 			    	align: 'left'
 			    },{
-			    	field: 'HEALTH_FACILITY',
-			    	title: 'Health Facility',
+			    	field: 'FACILITY',
+			    	title: 'Study Site',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
+			    	field: 'PARTICIPANT_ID',
+			    	title: 'Participant ID',
 			    	sortable: true,
 			    	align: 'left'
 			    },{
@@ -353,17 +403,38 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			    	sortable: true,
 			    	align: 'left'
 			    },{
+			    	field: 'CTC_NO',
+			    	title: 'CTC No.',
+			    	sortable: true,
+			    	align: 'left'
+			    },{
 			    	field: 'EDIT',
 			    	title: 'Edit',
 			    	align: 'center'
 			    },{
-			    	field: 'CTC_NO',
-			    	title: 'CTC Number',
+			    	field: 'VIRAL_RESULTS',
+			    	title: 'Viral Results (Copies/ML)',
 			    	sortable: true,
 			    	align: 'center'
+			    },{
+			    	field: 'VIRAL_COMMENTS',
+			    	title: 'Comments',
+			    	sortable: false,
+			    	visible: false
+			    },{
+			    	field: 'VIRAL_QUALITY',
+			    	title: 'Sample Quality',
+			    	sortable: false,
+			    	visible: false
+			    },{
+			    	field: 'VIRAL_TYPE',
+			    	title: 'Sample Type',
+			    	sortable: false,
+			    	visible: false
 			    }]
 			})
 		}
+				
 		function updateTableCell(index,cellid,cellval){
 			$("#tblOne").bootstrapTable('updateCell', {
 				index: index,

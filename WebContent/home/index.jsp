@@ -104,11 +104,11 @@ if(!session.isNew() && session.getAttribute("uname") != null){
     	<!-- Sidebar -->
         <div class="sidebar collapse">
         	<ul class="navigation">
-            	<li class="active"><a href="#"><i class="fa fa-laptop"></i> Dashboard</a></li>
+            	<li class="active"><a href="#"><i class="fa fa-laptop"></i> Dashboard </a></li>
             	<li>
         			<a href="#" class="expand"><i class="fa fa-table"></i> Tables</a>
 					<ul>
-                		<li><a href="#">Baseline Data</a></li>
+                		<li><a href="#" id="change_table" data-param1=<%=sid1%> data-param2=<%=dbase %>>Baseline Data : Table 2</a></li>
                 		<li><a href="#">Midline Data</a></li>
                 		<li><a href="#">Endline Data</a></li>
                 	</ul>
@@ -134,7 +134,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
         <div class="page-content">
             <!-- Page title -->
         	<div class="page-title">
-                <h5><i class="fa fa-bars"></i> Dashboard <small>Welcome, <% out.print(fname); %> </small></h5>
+                <h5><i class="fa fa-bars"></i> Baseline V1 : <small>Welcome, <% out.print(fname); %> </small></h5>
             </div>
             <!-- /page title -->
             
@@ -173,60 +173,71 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                        	</div>
                 	</div>
                 </div>
-                <table id="tblOne"></table>
+                <table id="tblOne" data-row-style="rowStyle"></table>
                 </div>
             </div>
             <!-- /form submission data -->
             
-             <!-- Edit Link: Form Modal -->
-            <div id="frmViroLoad" class="modal fade" tabindex="-1" role="dialog">
+             <!-- Edit Rec: Form Modal -->
+            <div id="divEditRec" class="modal fade" tabindex="-1" role="dialog">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h5 class="modal-title">VIRAL Load Details</h5>
+                            <h5 class="modal-title">Edit Record</h5>
                         </div>
 
                         <!-- Form inside modal -->
-                        <form id="frmViro" action="../User" method="post" role="form">
+                        <form id="frmEditRec" action="../User" method="post" role="form">
 
                             <div class="modal-body has-padding">
                                 <div class="form-group">
                                     <div class="row">
-                                    <div class="col-sm-6">
+                                    <div class="col-sm-4">
+                                        <label for=region>Region Name</label>
+                                        <input name="region" type="text" placeholder="Region" class="form-control" readonly="readonly">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label for="district">District Name</label>
+                                        <input name="district" type="text" placeholder="District" class="form-control" readonly="readonly">
+                                    </div>
+                                    <div class="col-sm-4">
                                         <label for="sitename">Facility Name</label>
-                                        <input name="sitename" type="text" placeholder="Eugene" class="form-control" readonly="readonly">
+                                        <input name="sitename" type="text" placeholder="Facility Name" class="form-control" readonly="readonly">
                                     </div>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-sm-6">
-                                            <label for="viralid">Patient ID</label>
+                                        <div class="col-sm-4">
+                                            <label for="participantid">Patient ID</label>
+                                            <input name="participantid" type="text" placeholder="XYZ-99-999" class="form-control" readonly="readonly">
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label for="viralid">Viral ID</label>
                                             <input name="viralid" type="text" placeholder="XYZ-99-999" class="form-control" readonly="readonly">
                                         </div>
-
-                                        <div class="col-sm-6">
-                                            <label>VIRAL Load Results</label>
-                                            <input name="results" type="text" placeholder="VIRO Results" class="form-control">
+                                        <div class="col-sm-4">
+                                            <label for="ctcno">CTCNo</label>
+                                            <input name="ctcno" type="text" placeholder="XYZ-99-999" class="form-control" readonly="readonly">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                 	<div class="row">
-                                		<div class="col-sm-6">
+                                		<div class="col-sm-4">
                                 			<label for="tdate">Todays Date</label>
                                             <input name="tdate" type="text" placeholder="Date" class="form-control" readonly="readonly">
                                 		</div>
-                                		<div class="col-sm-4">
-                                			<label>Physician Name</label>
-                                            <input name="phyname" type="text" value="<% out.print(fname); %>" class="form-control" readonly="readonly">
-                                		</div>
-                                		<div class="col-sm-2">
-                                			<label for="initials">Initials</label>
-                                            <input name="initials" type="text" placeholder="IL" class="form-control" maxlength=2 >
-                                		</div>
+
+									<div class="col-sm-4">
+										<label for="deceased">Deceased</label>
+                                		<select id="deceased" name="deceased" class="select">
+	                                		<option value="false" >No</option>
+	                                		<option value="true" >Yes</option>
+                                		</select>
+                       				</div>
                                 	</div>
                                 </div>
                             </div>
@@ -234,7 +245,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Submit form</button>
-                                <input type="hidden" name="rtype" value="6">
+                                <input type="hidden" name="rtype" value="9">
                                 <input type="hidden" name="tablename" value="">
                                 <input type="hidden" name="recid" value="">
                                 <input type="hidden" name="dbase" value="<% out.print(dbase); %>">
@@ -259,6 +270,16 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 <script type="text/javascript" src="../js/plugins/forms/select2.min.js"></script>
 <script>
 	$(document).ready(function(){
+		
+		$("#deceased").select2({
+			width:'100%',
+			minimumResultsForSearch: Infinity,
+		});
+		
+		$("#change_table").click(function(){
+			window.location.replace("index2.jsp?sid="+ $(this).attr('data-param1')+"&dbase"+$(this).attr('data-param2'));
+		});
+		
 		$('.dropdown, .btn-group').on('show.bs.dropdown', function(e){
 			$(this).find('.dropdown-menu').first().stop(true, true).fadeIn(100);
 		});
@@ -297,65 +318,59 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 		$("#searchBtn").click(function(){
 			$("#tblOne").bootstrapTable('refresh');
 		});
-		$('#frmViroLoad').on('show.bs.modal', function () {
+		$('#divEditRec').on('show.bs.modal', function () {
 			$("input[name='tdate']").val( today.toDateString() );
 		});
 		//Refresh
 		$("#tblOne").on('refresh.bs.table', function(){
-			alert("hellow");
+			//alert("hellow");
 		});
 		//Row Click
 	    $("#tblOne").on('click-row.bs.table', function(e, row, $element){
 	    	$("input[name='recid']").val(row['_URI']);
-	    	$("input[name='sitename']").val(row['HEALTH_FACILITY']);
+	    	$("input[name='region']").val(row['REGION']);
+	    	$("input[name='district']").val(row['DISTRICT']);
+	    	$("input[name='sitename']").val(row['FACILITY']);
 	    	$("input[name='tablename']").val(row['TABLE_NAME']);
-	    	$("input[name='viralid']").val(row['PARTICIPANT_ID']);
+	    	$("input[name='participantid']").val(row['PARTICIPANT_ID']);
+	    	$("input[name='viralid']").val(row['VIRAL_ID']);
+	    	$("input[name='ctcno']").val(row['CTC_NO']);
+	    	
+	    	if( JSON.stringify(row['DECEASED']) == 'true'){
+	    		$("#deceased").val( 'true' ).trigger('change');	
+	    	}else{
+	    		$("#deceased").val( 'false' ).trigger('change');
+	    	}
+	    	    	
+	    	//$("select[name='deceased']").val(row['DECEASED']);
 	    	RowIndex = $element.index();
 	    });
 		
-		$("#frmViro").validate({
-			rules:{
-				viro:{
-					required: true
-				},
-				initials:{
-					required: true,
-					minlength:2
-				}
-			},
-			messages:{
-				viro: {
-					required: "Required field"
-				},
-				initials:{
-					required: "Required field",
-					minlength: "Invalid"
-				}
-			},
-			submitHandler: function(form){
-				var validator = this;
-				$.ajax({
-					url : $(form).attr('action'),
-					type: $(form).attr('method'),
-				   	data: $(form).serialize(),
-				   	dataType : 'json',
-				   	success: function(data) {
-				   		updateTableCell(RowIndex,"VIRAL_RESULTS",$("input[name='results']").val());
-	                    $("#frmViroLoad").modal('hide');
-	                },
-	                error: function(xhr, ajaxOptions, thrownError){
-	                    validator.showErrors( {"viro": xhr.status + " " + thrownError });
-	                }
-				});
-				//form.preventDefault();
-				return false; 
-			}
-		});
+		$("#frmEditRec").submit( function(e) {
+			var validator = this;
+			var form = $('#frmEditRec');
+			$.ajax({
+				url : $(form).attr('action'),
+				type: $(form).attr('method'),
+			   	data: $(form).serialize(),
+			   	dataType : 'text',
+			   	success: function(data) {
+			   		updateTableCell(RowIndex,'DECEASED',$('#deceased').val() );
+			   		$('#divEditRec').modal('hide');
+                },
+                error: function(xhr, ajaxOptions, thrownError){
+                    validator.showErrors( {'EditRec': xhr.status + " " + thrownError });
+                }
+			});
+			e.preventDefault();
+		})
+		
+		
 		function loadSummary(){
 			$.ajax({
 				url	: "../User",
 				type: "POST",
-				data: "rtype=7",
+				data: "rtype=7&tablename=view_table1",
 				datatype: "json",
 				success: function(data){
 					$("#idtotal").text(data.total_rec);
@@ -376,26 +391,42 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 				sidePagination: "server",
 				contentType: 'application/x-www-form-urlencoded',
 				showColumns: true,
+				singleSelect: true,
 				search: false,
 				pageSize: 10,
             	pageList: [10, 25, 50, 100],
             	showRefresh: true,
 				queryParams: function(p){
-				return{
-					rtype: 2,
-					tablename: "view_table1",
-					limit : this.pageSize,
-					offset: this.pageSize * (this.pageNumber - 1),
-					//search: this.searchText,
-					search : $("#search").val(),
-					searchBy: $("#searchBy").val(),
-					sort:	this.sortName,
-					order:  this.sortOrder
-				}
+					return{
+						rtype: 2,
+						tablename: "view_table1",
+						limit : this.pageSize,
+						offset: this.pageSize * (this.pageNumber - 1),
+						//search: this.searchText,
+						search : $("#search").val(),
+						searchBy: $("#searchBy").val(),
+						sort:	this.sortName,
+						order:  this.sortOrder
+					}
 				},
+				onDblClickRow: function (row, $element) {
+					//alert( row['_URI'] );
+		            //var key = row["key"];               
+		            //window.location.href = "orders/display/"+key;
+		            $("#divEditRec").modal("show");
+		        },
+		        rowStyle: function(row,index){
+		        	if ( row['DECEASED'] ) {
+		        		var classes = ['active', 'success', 'info', 'warning', 'danger'];
+						//return { classes: 'danger'};
+		        		return { classes: classes[3] };
+				    }
+				    return {};
+		        },
 				columns: [{
 				   	field: 'REGION',
-			    	title: 'Region'
+			    	title: 'Region',
+			    	sortable: true
 			    },{
 				   	field: 'DISTRICT',
 				   	title: 'District',
@@ -435,6 +466,11 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			    	field: 'VIRAL_TYPE',
 			    	title: 'Sample Type',
 			    	sortable: false,
+			    	visible: false
+			    },{
+			    	field: 'DECEASED',
+			    	title: 'Deceased',
+			    	sortable: true,
 			    	visible: false
 			    }]
 			})

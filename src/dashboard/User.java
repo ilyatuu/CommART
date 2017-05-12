@@ -47,6 +47,7 @@ public class User extends HttpServlet {
 	String tablename= "";
 	String database = "";
 	String skey = "";
+	String uri = "";
 	
 	DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	Date date = new Date();
@@ -236,6 +237,7 @@ public class User extends HttpServlet {
 				usr.put("database", session.getAttribute("dbase").toString());
 				usr.put("level", session.getAttribute("level").toString());
 				usr.put("levelvalue", session.getAttribute("levelvalue").toString());
+				usr.put("tablename", request.getParameter("tablename"));
 				
 				if(!session.isNew()){
 					pw.print( selectSummary( usr ).toString() );
@@ -258,6 +260,23 @@ public class User extends HttpServlet {
                 pw.print(json.toString());
                 pw.close();
 				System.out.println("CTC No Updated");
+				break;
+			case 9: //Updated Death status
+				
+				uri = request.getParameter("recid");
+				database  = request.getSession().getAttribute("dbase").toString();
+				tablename = request.getParameter("tablename");
+				String isDeceased = request.getParameter("deceased");
+				
+				if( UpdateDeceasedStatus(uri,Boolean.parseBoolean(isDeceased),tablename,database)){
+					pw = response.getWriter();
+					pw.print("{success:true}");
+					pw.close();
+					System.out.println("Death status updated for record _uri "+uri+" value "+isDeceased);
+				}else{
+					System.out.println("Error updating death status");
+				}
+					
 				break;
 			default:
 				break;
@@ -429,7 +448,7 @@ public class User extends HttpServlet {
 		try{
 			db = new DbDetails();
 			cnn = db.getConn(dbase);
-			query = "UPDATE "+dtable+" SET VIRAL_RESULTS=?, VIRAL_COMMENTS=?,VIRAL_QUALITY=?, VIRAL_TYPE=?, SUBMITED_BY=?, SUBMITTED_ON=? WHERE _URI=?;";
+			query = "UPDATE "+dtable+" SET VIRAL_RESULTS=?, VIRAL_COMMENTS=?,VIRAL_QUALITY=?, VIRAL_TYPE=?, SUBMITTED_BY=?, SUBMITTED_ON=? WHERE _URI=?;";
 			pstm = cnn.prepareStatement(query);
 			pstm.setString(1, viro.getResults());
 			pstm.setString(2, viro.getComments());
@@ -442,6 +461,41 @@ public class User extends HttpServlet {
 			//Log Update
 			System.out.println(pstm.toString());
 			
+			if (pstm.executeUpdate() == 1){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}finally{
+			try{
+		         if(pstm!=null)
+		            cnn.close();
+		      }catch(SQLException se){
+		      }// do nothing
+		      try{
+		         if(cnn!=null)
+		            cnn.close();
+		      }catch(SQLException se){
+		         se.printStackTrace();
+		      }//end finally try
+		}
+	}
+	protected boolean UpdateDeceasedStatus(String uri, boolean value, String dtable, String dbase){
+		try{
+			db = new DbDetails();
+			cnn = db.getConn(dbase);
+			query = "UPDATE "+dtable+" SET DECEASED=? WHERE _URI=?;";
+			pstm = cnn.prepareStatement(query);
+			pstm.setBoolean(1, value);
+			pstm.setString(2, uri);
+			
+			//Log Update
 			if (pstm.executeUpdate() == 1){
 				return true;
 			}else{
@@ -561,8 +615,9 @@ public class User extends HttpServlet {
 		try{
 			db = new DbDetails();
 			cnn = db.getConn(usr.getString("database"));
+			tablename = usr.getString("tablename");
 			
-			query = "SELECT COUNT(*) FROM view_table1;";
+			query = "SELECT COUNT(*) FROM "+tablename+";";
 			
 			if(!usr.getString("level").equalsIgnoreCase("country")){
 				if(!usr.getString("level").isEmpty() && !usr.getString("levelvalue").isEmpty()){

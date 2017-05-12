@@ -103,12 +103,12 @@ if(!session.isNew() && session.getAttribute("uname") != null){
     	<!-- Sidebar -->
         <div class="sidebar collapse">
         	<ul class="navigation">
-            	<li class="active"><a href="#"><i class="fa fa-laptop"></i> Dashboard</a></li>
+            	<li class="active"><a href="#"><i class="fa fa-laptop"></i> Dashboard </a></li>
             	<li>
         			<a href="#" class="expand"><i class="fa fa-table"></i> Tables</a>
 					<ul>
-                		<li><a href="#">Table 1</a></li>
-                		<li><a href="#">Table 2</a></li>
+                		<li><a href="#" id="change_table" data-param1=<%=sid1%> data-param2=<%=dbase %>>Baseline V2</a></li>
+                		<li><a href="#">Midline Data</a></li>
                 	</ul>
         		</li>
                 <li>
@@ -132,7 +132,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
         <div class="page-content">
             <!-- Page title -->
         	<div class="page-title">
-                <h5><i class="fa fa-bars"></i> Dashboard <small>Welcome, <% out.print(fname); %> </small></h5>
+                <h5><i class="fa fa-bars"></i> Baseline V1 : <small>Welcome, <% out.print(fname); %> </small></h5>
             </div>
             <!-- /page title -->
             
@@ -265,7 +265,10 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 		$("#searchBy").select2({
 			width:'100%',
 			minimumResultsForSearch: Infinity,
-			});
+		});
+		$("#change_table").click(function(){
+			window.location.replace("dm2.jsp?sid="+ $(this).attr('data-param1')+"&dbase"+$(this).attr('data-param2'));
+		});
 		$("#logout").click(function(){
 			$.ajax({
 				url:"../User",
@@ -338,7 +341,7 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 			$.ajax({
 				url	: "../User",
 				type: "POST",
-				data: "rtype=7",
+				data: "rtype=7&tablename=view_table1",
 				datatype: "json",
 				success: function(data){
 					$("#idtotal").text(data.total_rec);

@@ -94,6 +94,8 @@ public class View extends HttpServlet {
 					opt.put("offset",request.getParameter("offset"));
 					opt.put("search",request.getParameter("search"));
 					opt.put("searchBy",request.getParameter("searchBy"));
+					opt.put("sort",request.getParameter("sort"));
+					opt.put("order",request.getParameter("order"));
 					
 					tablename =  request.getParameter("tablename");
 					if(!session.isNew()){
@@ -175,7 +177,6 @@ public class View extends HttpServlet {
 					query = query.replace(";", "")+" WHERE "+usr.getString("level")+" like '%"+ usr.getString("levelvalue")+"%';";
 				}	
 			}
-			System.out.println(query);
 			pstm = cnn.prepareStatement(query);
 			rset = pstm.executeQuery();
 			Integer rows=0;
@@ -183,8 +184,16 @@ public class View extends HttpServlet {
 				rows = rset.getInt(1);
 			}
 			
+			
+			if( opt.has("sort") ){
+				query = query.replace(";", "") + " order by " + opt.getString("sort") + " " + opt.getString("order") + ";";
+			}
+			
 			query = query.replace(";", "") + " limit "+opt.getString("limit")+" offset "+opt.getString("offset")+";";
 			query = query.replace("COUNT(*)", "*");
+			
+			System.out.println(query);
+			//System.out.println("sort"+opt.getString("sort")+" and order "+opt.getString("order"));
 			
 			pstm = cnn.prepareStatement(query);
 			rset = pstm.executeQuery();
