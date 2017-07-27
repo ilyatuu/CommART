@@ -267,7 +267,6 @@ if(!session.isNew() && session.getAttribute("uname") != null){
 <script type="text/javascript" src="../js/plugins/interface/collapsible.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/bootstrap-table.min.js"></script>
 <script type="text/javascript" src="../js/plugins/interface/validate.min.js"></script>
-<script type="text/javascript" src="../js/plugins/forms/select2.min.js"></script>
 <script>
 	$(document).ready(function(){
 		
